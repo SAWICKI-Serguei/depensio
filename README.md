@@ -12,7 +12,7 @@ Les données restent chez vous : tout tourne en local dans Docker.
 ## Prérequis
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows, macOS) ou Docker Engine + Docker Compose (Linux)
-- [Git](https://git-scm.com/) (ou téléchargez le ZIP depuis GitHub)
+
 
 ## Installation
 
