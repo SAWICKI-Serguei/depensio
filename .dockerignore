@@ -1,0 +1,10 @@
+.git
+.gitignore
+.env
+.env.example
+**/node_modules
+**/*.log
+data
+scripts
+README.md
+LICENSE

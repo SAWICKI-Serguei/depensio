@@ -1,0 +1,15 @@
+# Marques supplémentaires, une par ligne, au format : Nom|domaine
+# Le nom sert à fabriquer le nom du fichier (comme dans l'appli) :
+# "Mon Salon" donnera monsalon.png (ou .svg), utilisé quand vous tapez ce libellé.
+# Exemple (retirez le # pour l'activer) :
+# Mon Salon|monsalon.fr
+
+CTS|cts-strasbourg.eu
+
+ES|es.fr
+Action Logement|actionlogement.fr
+France Travail|francetravail.fr
+
+ES|es.fr
+Action Logement|actionlogement.fr
+France Travail|francetravail.fr

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connexion · Dépensio</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%233b82f6'/%3E%3Ctext x='16' y='22' font-size='18' font-family='Segoe UI,Arial,sans-serif' font-weight='700' text-anchor='middle' fill='white'%3E€%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#0b1220; --surface:#111a2e; --surface2:#172138; --border:#223049;
+    --accent:#3b82f6; --accent2:#2f6fe0; --green:#22c55e; --red:#ef4444;
+    --text:#e5e7eb; --muted:#8b9bb4;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif; font-size:14px;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+    background-image:radial-gradient(900px 500px at 50% -10%, rgba(59,130,246,.12), transparent 60%);
+  }
+  .card{
+    width:100%; max-width:400px; background:var(--surface); border:1px solid var(--border);
+    border-radius:14px; padding:28px 28px 22px; box-shadow:0 20px 50px rgba(0,0,0,.35);
+  }
+  .logo{display:flex; align-items:center; gap:12px; margin-bottom:22px}
+  .mark{
+    width:40px; height:40px; border-radius:10px; background:var(--accent); color:#fff;
+    font-weight:700; font-size:20px; display:flex; align-items:center; justify-content:center;
+  }
+  .logo h1{margin:0; font-size:20px; letter-spacing:.2px}
+  .logo p{margin:2px 0 0; color:var(--muted); font-size:12px}
+  h2{margin:0 0 6px; font-size:16px; font-weight:600}
+  .muted{color:var(--muted); margin:0 0 18px; line-height:1.45}
+  .champ{margin-bottom:14px}
+  .champ.hidden{display:none}
+  label{display:block; font-size:12px; color:var(--muted); margin-bottom:6px}
+  input[type=password],input[type=text]{
+    width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text);
+    border-radius:8px; padding:10px 12px; font-size:14px; font-family:inherit; outline:none;
+  }
+  input:focus{border-color:var(--accent); box-shadow:0 0 0 3px rgba(59,130,246,.2)}
+  .check{display:flex; align-items:center; gap:8px; color:var(--muted); font-size:12px; margin:-4px 0 16px; cursor:pointer; user-select:none}
+  .check input{accent-color:var(--accent)}
+  .msg{
+    margin:0 0 14px; padding:10px 12px; border-radius:8px; font-size:13px; line-height:1.4;
+    border:1px solid transparent;
+  }
+  .msg[hidden]{display:none}
+  .msg.err{background:rgba(239,68,68,.12); border-color:rgba(239,68,68,.35); color:#fca5a5}
+  .msg.ok{background:rgba(34,197,94,.12); border-color:rgba(34,197,94,.35); color:#86efac}
+  button{
+    width:100%; background:var(--accent); color:#fff; border:0; border-radius:8px;
+    padding:11px 14px; font-size:14px; font-weight:600; font-family:inherit; cursor:pointer;
+  }
+  button:hover{background:var(--accent2)}
+  button:disabled{opacity:.6; cursor:default}
+  .aide{margin:18px 0 0; color:var(--muted); font-size:12px; line-height:1.5; text-align:center}
+  .aide a{color:var(--accent); text-decoration:none}
+  .aide a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<main class="card">
+  <div class="logo">
+    <div class="mark">€</div>
+    <div>
+      <h1>Dépensio</h1>
+      <p>Vos dépenses, sous contrôle.</p>
+    </div>
+  </div>
+
+  <h2 id="titre">Connexion</h2>
+  <p id="intro" class="muted">Entrez votre mot de passe pour accéder à vos données.</p>
+
+  <form id="form" novalidate>
+    <div class="champ hidden" id="champ-actuel">
+      <label for="actuel">Mot de passe actuel</label>
+      <input type="password" id="actuel" autocomplete="current-password">
+    </div>
+
+    <div class="champ">
+      <label for="mdp" id="lbl-mdp">Mot de passe</label>
+      <input type="password" id="mdp" autocomplete="current-password" autofocus>
+    </div>
+
+    <div class="champ hidden" id="champ-conf">
+      <label for="conf">Confirmer le mot de passe</label>
+      <input type="password" id="conf" autocomplete="new-password">
+    </div>
+
+    <label class="check"><input type="checkbox" id="voir"> Afficher le mot de passe</label>
+
+    <p id="msg" class="msg" hidden></p>
+
+    <button type="submit" id="btn">Se connecter</button>
+  </form>
+
+  <p class="aide" id="aide"></p>
+</main>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const form = $("#form"), btn = $("#btn"), msg = $("#msg");
+  const inActuel = $("#actuel"), inMdp = $("#mdp"), inConf = $("#conf");
+  const params = new URLSearchParams(location.search);
+  let mode = "login"; // "login" | "setup" | "changer"
+
+  function afficher(texte, erreur) {
+    msg.textContent = texte;
+    msg.className = "msg " + (erreur ? "err" : "ok");
+    msg.hidden = false;
+  }
+
+  function appliquerMode() {
+    $("#champ-actuel").classList.toggle("hidden", mode !== "changer");
+    $("#champ-conf").classList.toggle("hidden", mode === "login");
+    if (mode === "setup") {
+      $("#titre").textContent = "Bienvenue 👋";
+      $("#intro").textContent = "Première utilisation : choisissez un mot de passe (8 caractères minimum). Il protégera l'accès à Dépensio.";
+      $("#lbl-mdp").textContent = "Nouveau mot de passe";
+      inMdp.autocomplete = "new-password";
+      btn.textContent = "Définir le mot de passe";
+      $("#aide").textContent = "Ce mot de passe est stocké de façon chiffrée (scrypt) sur votre machine uniquement.";
+    } else if (mode === "changer") {
+      $("#titre").textContent = "Changer le mot de passe";
+      $("#intro").textContent = "Toutes les autres sessions ouvertes seront déconnectées.";
+      $("#lbl-mdp").textContent = "Nouveau mot de passe";
+      inMdp.autocomplete = "new-password";
+      btn.textContent = "Modifier";
+      $("#aide").innerHTML = '<a href="/">← Retour au tableau de bord</a>';
+      inActuel.focus();
+    } else {
+      $("#titre").textContent = "Connexion";
+      $("#intro").textContent = "Entrez votre mot de passe pour accéder à vos données.";
+      $("#lbl-mdp").textContent = "Mot de passe";
+      inMdp.autocomplete = "current-password";
+      btn.textContent = "Se connecter";
+      $("#aide").textContent = "";
+    }
+  }
+
+  $("#voir").addEventListener("change", e => {
+    const t = e.target.checked ? "text" : "password";
+    inActuel.type = t; inMdp.type = t; inConf.type = t;
+  });
+
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    msg.hidden = true;
+    const mdp = inMdp.value, conf = inConf.value, actuel = inActuel.value;
+
+    let url, body;
+    if (mode === "login") {
+      if (!mdp) return afficher("Entrez votre mot de passe.", true);
+      url = "/api/auth/connexion"; body = { motDePasse: mdp };
+    } else if (mode === "setup") {
+      if (mdp.length < 8) return afficher("8 caractères minimum.", true);
+      if (mdp !== conf) return afficher("La confirmation ne correspond pas.", true);
+      url = "/api/auth/creer"; body = { motDePasse: mdp, confirmation: conf };
+    } else {
+      if (!actuel) return afficher("Entrez votre mot de passe actuel.", true);
+      if (mdp.length < 8) return afficher("8 caractères minimum.", true);
+      if (mdp !== conf) return afficher("La confirmation ne correspond pas.", true);
+      url = "/api/auth/mot-de-passe"; body = { actuel, nouveau: mdp, confirmation: conf };
+    }
+
+    btn.disabled = true;
+    try {
+      const r = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        afficher(data.erreur || `Erreur ${r.status}`, true);
+        if (mode === "login") { inMdp.value = ""; inMdp.focus(); }
+        return;
+      }
+      if (mode === "changer") {
+        afficher("Mot de passe modifié ✓", false);
+        setTimeout(() => location.replace("/"), 900);
+      } else {
+        location.replace("/");
+      }
+    } catch {
+      afficher("Impossible de joindre le serveur.", true);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  (async () => {
+    let etat;
+    try {
+      etat = await (await fetch("/api/auth/etat", { cache: "no-store" })).json();
+    } catch {
+      afficher("Impossible de joindre le serveur.", true);
+      return;
+    }
+    if (!etat.configure) mode = "setup";
+    else if (etat.connecte && params.has("changer")) mode = "changer";
+    else if (etat.connecte) { location.replace("/"); return; }
+    appliquerMode();
+  })();
+})();
+</script>
+</body>
+</html>

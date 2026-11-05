@@ -1,0 +1,30 @@
+services:
+  app:
+    build: .
+    container_name: depensio
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Paris
+    volumes:
+      - depensio-data:/app/data
+      - ./frontend:/app/public
+    expose:
+      - "3000"
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: depensio-https
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "${PORT:-3001}:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  depensio-data:
+  caddy-data:
+  caddy-config:

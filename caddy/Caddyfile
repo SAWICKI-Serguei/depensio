@@ -1,0 +1,9 @@
+{
+	auto_https disable_redirects
+}
+
+localhost, 127.0.0.1 {
+	tls internal
+	encode gzip
+	reverse_proxy app:3000
+}

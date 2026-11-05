@@ -1,0 +1,23 @@
+# Secrets et configuration locale
+.env
+
+# Donnees
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Dependances et logs
+node_modules/
+*.log
+
+# Logos de marques : telecharges par chaque utilisateur (voir README)
+frontend/logos/*
+!frontend/logos/.gitkeep
+scripts/logos-rapport.json
+
+# Systeme / editeur
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/
