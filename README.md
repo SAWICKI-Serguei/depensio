@@ -4,6 +4,10 @@
 
 Suivi de dépenses personnelles et de facturation récurrente, avec un tableau de bord web.
 Les données restent chez vous : tout tourne en local dans Docker.
+<img width="1828" height="902" alt="image" src="https://github.com/user-attachments/assets/0b197056-b18c-4b01-80ad-ced530d0df30" />
+<img width="1505" height="409" alt="image" src="https://github.com/user-attachments/assets/de2a4fe9-3d8e-4906-8dbd-9bc265b23383" />
+<img width="1830" height="973" alt="image" src="https://github.com/user-attachments/assets/4cfbf8c9-a2f9-4069-b744-c4796e57d64c" />
+
 
 ## Prérequis
 
