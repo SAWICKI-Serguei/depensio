@@ -101,10 +101,30 @@ select option:disabled{color:var(--muted)}
 .blogo.lg img{width:20px;height:20px}
 .blogo.fb{background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:11px;font-weight:700}
 .blogo.lg.fb{font-size:13px}
+.blogo.emoji{background:var(--surface2);border:1px solid var(--border);font-size:12px;line-height:1}
+.blogo.lg.emoji{font-size:16px}
 .blogo.pend{visibility:hidden}
+.blogo.custom{background:var(--surface2);border:1px solid var(--border);font-size:12px;line-height:1}
+.blogo.lg.custom{font-size:16px}
 .ac-wrap{position:relative}
 .ac-wrap input.has-logo{padding-left:48px}
-.ac-wrap .ac-logo{position:absolute;left:10px;top:50%;transform:translateY(-50%);display:flex;pointer-events:none}
+.ac-wrap .ac-logo{position:absolute;left:10px;top:50%;transform:translateY(-50%);display:flex}
+.ac-wrap .ac-logo .blogo{pointer-events:none}
+.ac-wrap .ac-logo.pickable{cursor:pointer}
+.ac-wrap .ac-logo.pickable .blogo.fb,.ac-wrap .ac-logo.pickable .blogo.custom{pointer-events:auto}
+.ac-wrap .ac-logo.pickable .blogo.fb:hover,.ac-wrap .ac-logo.pickable .blogo.custom:hover{border-color:var(--accent)}
+.emoji-pick-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:26px;height:26px;display:grid;place-items:center;border-radius:7px;background:transparent;border:1px solid transparent;color:var(--muted);cursor:pointer;font-size:14px;line-height:1}
+.emoji-pick-btn:hover{background:var(--surface2);border-color:var(--border);color:var(--text)}
+.emoji-pick-btn.hidden{display:none}
+.ac-wrap input.has-pickbtn{padding-right:38px}
+.emoji-pop{position:absolute;z-index:70;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.45);padding:10px;width:252px}
+.emoji-pop .ep-head{font-size:11.5px;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.emoji-pop .ep-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;max-height:150px;overflow-y:auto}
+.emoji-pop .ep-grid button{all:unset;cursor:pointer;display:grid;place-items:center;width:26px;height:26px;border-radius:7px;font-size:16px;line-height:1}
+.emoji-pop .ep-grid button:hover{background:var(--surface2)}
+.emoji-pop .ep-custom{display:flex;gap:6px;margin-top:8px}
+.emoji-pop .ep-custom input{text-align:center;padding:6px}
+.emoji-pop .ep-foot{margin-top:8px;display:flex;justify-content:flex-end}
 .ac-list{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:60;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.45);padding:4px;max-height:280px;overflow-y:auto}
 .ac-item{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;cursor:pointer}
 .ac-item:hover,.ac-item.sel{background:rgba(59,130,246,.16)}
@@ -406,6 +426,7 @@ td.empty{text-align:center}
         <div class="ac-wrap">
           <span class="ac-logo" id="t-logo"></span>
           <input id="t-lib" maxlength="80" required autocomplete="off" placeholder="Ex. Courses, Essence, Salaire…">
+          <button type="button" class="emoji-pick-btn hidden" id="t-emoji-btn" title="Choisir un emoji" aria-label="Choisir un emoji">🙂</button>
           <div class="ac-list hidden" id="t-ac" role="listbox"></div>
         </div>
       </div>
@@ -430,6 +451,7 @@ td.empty{text-align:center}
         <div class="ac-wrap">
           <span class="ac-logo" id="r-logo"></span>
           <input id="r-lib" maxlength="80" required autocomplete="off" placeholder="Ex. Loyer, Netflix, Salaire…">
+          <button type="button" class="emoji-pick-btn hidden" id="r-emoji-btn" title="Choisir un emoji" aria-label="Choisir un emoji">🙂</button>
           <div class="ac-list hidden" id="r-ac" role="listbox"></div>
         </div>
       </div>
@@ -591,6 +613,17 @@ const MARQUES=[
   "Castorama|castorama.fr|L","Brico Dépôt|bricodepot.fr|L","IKEA|ikea.com|L",
   "Maisons du Monde|maisonsdumonde.com|L","Conforama|conforama.fr|L","But|but.fr|L",
   "Darty|darty.com|L","Boulanger|boulanger.com|L",
+  /* Logement — loyer : agences / gérance */
+  "Foncia|foncia.com|L","Century 21|century21.fr|L|Century21","Orpi|orpi.com|L",
+  "Nexity|nexity.fr|L","Citya Immobilier|citya.com|L|Citya","Square Habitat|squarehabitat.fr|L",
+  "Laforêt|laforet.com|L|Laforet","Guy Hoquet|guy-hoquet.com|L","Stéphane Plaza Immobilier|stephaneplazaimmobilier.com|L|Stephane Plaza",
+  /* Logement — loyer : garanties et assurances (Visale, déjà listée en alias d'Action Logement, n'est pas redupliquée) */
+  "GarantMe|garantme.fr|L|Garantme","Unkle|unkle.fr|L",
+  "Smartloc|smartloc.fr|L","Luko|luko.eu|L","Leocare|leocare.fr|L",
+  /* Logement — loyer : plateformes de paiement */
+  "Flatlooker|flatlooker.com|L","Rentila|rentila.com|L","SmartRent|smart-rent.fr|L|Smart Rent",
+  /* Logement — loyer générique (pas d'organisme précis : propriétaire particulier, etc.) → icône maison, pas de favicon */
+  "Loyer|#generic:🏠|L|Loyer mensuel,Rent",
   /* Transport */
   "SNCF|sncf-connect.com|T|SNCF Connect,TGV","Ouigo|ouigo.com|T","Uber|uber.com|T","Bolt|bolt.eu|T",
   "BlaBlaCar|blablacar.fr|T","RATP|ratp.fr|T","Île-de-France Mobilités|iledefrance-mobilites.fr|T|Navigo,IDFM",
@@ -618,22 +651,44 @@ const MARQUES=[
   "Fnac|fnac.com|O","Cultura|cultura.com|O","Decathlon|decathlon.fr|O","Pathé|pathe.fr|O|Pathe Gaumont,Cinéma",
   "UGC|ugc.fr|O","Ticketmaster|ticketmaster.fr|O","Airbnb|airbnb.fr|O","Booking.com|booking.com|O|Booking",
   "Micromania|micromania.fr|O","Ubisoft|ubisoft.com|O","Epic Games|epicgames.com|O","Steam|steampowered.com|O",
+  /* Loisirs — plateformes de réservation d'hôtels */
+  "Expedia|expedia.fr|O","Hotels.com|hotels.com|O|Hotels",
+  "Trivago|trivago.fr|O","Agoda|agoda.com|O","Kayak|kayak.fr|O",
+  "HolidayCheck|holidaycheck.fr|O","Hôtels.fr|hotels.fr|O|Hotels.fr","Logis Hôtels|logishotels.com|O|Logis Hotels",
+  "Accor|all.accor.com|O|AccorHotels,ALL,Ibis,Novotel,Mercure,Sofitel,Pullman",
+  /* Loisirs — générique (pas d'enseigne précise) → emoji, aucune requête réseau */
+  "Formation|#generic:🎓|O|Cours,Stage,MOOC",
   /* Autre : shopping, banques, assurances */
   "Amazon|amazon.fr|X","Cdiscount|cdiscount.com|X","AliExpress|aliexpress.com|X","Temu|temu.com|X",
   "Shein|shein.com|X","eBay|ebay.fr|X","Vinted|vinted.fr|X","Leboncoin|leboncoin.fr|X","Zalando|zalando.fr|X",
   "Zara|zara.com|X","H&M|hm.com|X|HM","Uniqlo|uniqlo.com|X","Kiabi|kiabi.com|X","Primark|primark.com|X",
   "Nike|nike.com|X","Adidas|adidas.fr|X","Sephora|sephora.fr|X","Action|action.com|X","Gifi|gifi.fr|X",
   "Yves Rocher|yves-rocher.fr|X","La Poste|laposte.fr|X","PayPal|paypal.com|X","Revolut|revolut.com|X",
-  "N26|n26.com|X","Lydia|lydia-app.com|X","Boursorama|boursorama.com|X","Fortuneo|fortuneo.fr|X",
+  "N26|n26.com|X","Lydia|lydia-app.com|X|Sumeria","Boursorama|boursorama.com|X|Boursorama Banque","Fortuneo|fortuneo.fr|X",
   "BNP Paribas|mabanque.bnpparibas|X","Société Générale|societegenerale.fr|X|SG","Crédit Agricole|credit-agricole.fr|X",
   "LCL|lcl.fr|X","Caisse d'Épargne|caisse-epargne.fr|X","La Banque Postale|labanquepostale.fr|X",
   "Crédit Mutuel|creditmutuel.fr|X","CIC|cic.fr|X","Qonto|qonto.com|X","Trade Republic|traderepublic.com|X",
+  "HSBC|hsbc.fr|X","Banque Populaire|banquepopulaire.fr|X","Hello bank!|hellobank.fr|X|Hello Bank,Hellobank",
+  "Monabanq|monabanq.com|X","BforBank|bforbank.com|X|Bfor Bank","Milleis Banque|milleis.fr|X|Milleis",
+  "Nickel|compte-nickel.fr|X|Compte Nickel","Orange Bank|orangebank.fr|X","Younited|younited.com|X|Younited Credit",
+  "Wise|wise.com|X","Revolut Business|revolut.com|X","Monzo|monzo.com|X","PayPal Business|paypal.com|X",
+  "Pixpay|pixpay.com|X","Xaalys|xaalys.com|X","Pumpkin|pumpkin.fr|X","Blank|blank.app|X",
   "AXA|axa.fr|X","MAIF|maif.fr|X","Macif|macif.fr|X","MMA|mma.fr|X","Matmut|matmut.fr|X","Allianz|allianz.fr|X",
   "CAF|caf.fr|X|Aide au logement,APL",
+  /* Loisirs (voyages par abonnement) */
+  "inCruises|incruises.com|O|Incruises,In Cruises",
   /* Santé */
   "Doctolib|doctolib.fr|H","Ameli|ameli.fr|H|Sécurité sociale,CPAM","Alan|alan.com|H",
   "Harmonie Mutuelle|harmonie-mutuelle.fr|H","MGEN|mgen.fr|H","Afflelou|afflelou.com|H","Krys|krys.com|H",
   "Grand Optical|grandoptical.com|H",
+  /* Santé — pharmacies et parapharmacies */
+  "Pharmacie Lafayette|pharmaciereseau.fr|H|Pharmacie Lafayette Conseil",
+  "Leclerc Parapharmacie|e-leclerc.com|H|Parapharmacie Leclerc",
+  "Pharmacie des Halles|pharmaciedeshalles.com|H",
+  "Newpharma|newpharma.fr|H","Pharmashopi|pharmashopi.com|H","1001pharmacies|1001pharmacies.com|H",
+  "Shop Pharmacie|shop-pharmacie.fr|H","Pharma GDD|pharmagdd.com|H",
+  /* Santé — génériques (pas d'enseigne précise) → emoji, aucune requête réseau */
+  "Pharmacie|#generic:💊|H","Hôpital|#generic:🏥|H|Hopital,Clinique",
   /* Revenus (code R) */
   "France Travail|francetravail.fr|R|Pôle emploi,Pole Emploi,ARE,Allocation chômage",
   "Action Logement|actionlogement.fr|R|Action Logement Services,Loca-Pass,Visale"
@@ -669,6 +724,20 @@ function scoreMarque(qn,keys){
   return best;
 }
 
+/* ----- Emoji personnalisé choisi par l'utilisateur (prioritaire sur tout le reste) ----- */
+const EMOJI_KEY="depensio_emojis";
+let customEmojis=new Map();
+try{const raw=JSON.parse(localStorage.getItem(EMOJI_KEY)||"{}");for(const k in raw)customEmojis.set(k,raw[k]);}catch{}
+function saveCustomEmojis(){
+  try{localStorage.setItem(EMOJI_KEY,JSON.stringify(Object.fromEntries(customEmojis)));}catch{}
+}
+function setCustomEmoji(key,emoji){
+  if(!key)return;
+  if(emoji)customEmojis.set(key,emoji);else customEmojis.delete(key);
+  saveCustomEmojis();
+}
+const EMOJI_SUGGESTIONS=["🛒","🍽️","🍔","☕","🚗","⛽","🚆","✈️","🏠","💡","📱","💳","🎬","🎮","🎵","📚","🎓","💊","🏥","🏋️","🐾","👶","🎁","🧾","💼","🛠️","✂️","🌿","🧺","🧴","🧹","☂️"];
+
 /* ----- Affichage des logos (cascade de sources) ----- */
 const logoCache=new Map();            // "clé|domaine" -> {n:index de la source qui marche} | null (aucune source)
 const logoTimers={tx:0,rec:0};        // anti-rebond pour les libellés inconnus
@@ -684,24 +753,36 @@ function logoSources(key,domain){
   }
   return s;
 }
-function logoHtml(label,big){
+// pickable=true : cette pastille représente un "pas de vrai logo trouvé" et peut être cliquée pour choisir un emoji
+function logoHtml(label,big,pickable){
   const b=brandFor(label);
   const key=logoKey(label,b);
   if(!key)return "";
   const dom=b?b.domain:"";
-  const ini=esc((b?b.nom:String(label).trim()).charAt(0).toUpperCase()||"?");
   const cls="blogo"+(big?" lg":"");
+  // 1) Emoji choisi par l'utilisateur : prioritaire sur tout (marque reconnue ou non)
+  if(customEmojis.has(key))return `<span class="${cls} custom" data-emoji-key="${esc(key)}">${esc(customEmojis.get(key))}</span>`;
+  const ini=esc((b?b.nom:String(label).trim()).charAt(0).toUpperCase()||"?");
+  // Marque sans vrai site (ex. "Loyer", "Pharmacie", "Hôpital" génériques) : emoji fixe, aucune requête réseau.
+  // Format du domaine : "#generic:<emoji>". Reste personnalisable via la pastille.
+  if(dom.startsWith("#generic:"))return `<span class="${cls} emoji"${pickable?` data-emoji-key="${esc(key)}"`:""}>${dom.slice(9)}</span>`;
   const c=logoCache.get(key+"|"+dom);
-  if(c===null)return `<span class="${cls} fb">${ini}</span>`;
+  if(c===null)return `<span class="${cls} fb"${pickable?` data-emoji-key="${esc(key)}"`:""}>${ini}</span>`;
   const n=c?c.n:0;
   const src=logoSources(key,dom)[n];
-  return `<span class="${cls} pend"><img class="blogo-img" src="${esc(src)}" alt="" ${big?"":'loading="lazy" '}referrerpolicy="no-referrer" data-k="${esc(key)}" data-d="${esc(dom)}" data-n="${n}" data-i="${ini}"></span>`;
+  return `<span class="${cls} pend"><img class="blogo-img" src="${esc(src)}" alt="" ${big?"":'loading="lazy" '}referrerpolicy="no-referrer" data-k="${esc(key)}" data-d="${esc(dom)}" data-n="${n}" data-i="${ini}"${pickable?` data-emoji-key="${esc(key)}"`:""}></span>`;
 }
-// Le champ Libellé réserve la place du logo seulement quand un logo est visible
+// Le champ Libellé réserve la place du logo seulement quand un logo est visible, et marque le slot "cliquable"
+// quand la pastille affichée est un repli (initiale ou emoji générique) plutôt qu'un vrai logo de marque.
 function syncSlot(slot){
   if(!slot||!slot.parentNode)return;
   const inp=slot.parentNode.querySelector("input");
   if(inp)inp.classList.toggle("has-logo",!!slot.querySelector(".blogo:not(.pend)"));
+  const b=slot.querySelector(".blogo.fb,.blogo.emoji,.blogo.custom");
+  slot.classList.toggle("pickable",!!b);
+  const btn=slot.parentNode.querySelector(".emoji-pick-btn");
+  if(btn)btn.classList.toggle("hidden",!b);
+  if(inp)inp.classList.toggle("has-pickbtn",!!(btn&&!btn.classList.contains("hidden")));
 }
 function logoOk(img){
   const p=img.parentNode;
@@ -713,7 +794,7 @@ function logoFail(img){
   const slot=img.closest(".ac-logo");
   const p=img.parentNode;
   logoCache.set((img.dataset.k||"")+"|"+(img.dataset.d||""),null);
-  if(p){p.classList.remove("pend");p.classList.add("fb");p.textContent=img.dataset.i||"?";}
+  if(p){p.classList.remove("pend");p.classList.add("fb");p.textContent=img.dataset.i||"?";if(img.dataset.emojiKey)p.dataset.emojiKey=img.dataset.emojiKey;}
   syncSlot(slot);
 }
 function logoNext(img){
@@ -721,6 +802,63 @@ function logoNext(img){
   const n=(+img.dataset.n||0)+1;
   if(n<src.length){img.dataset.n=n;img.src=src[n];}
   else logoFail(img);
+}
+
+/* ----- Sélecteur d'emoji (quand aucun logo n'a été trouvé) ----- */
+let emojiPop=null;
+function fermerEmojiPop(){
+  if(emojiPop){emojiPop.remove();emojiPop=null;}
+  document.removeEventListener("mousedown",emojiPopOutside,true);
+  document.removeEventListener("keydown",emojiPopEsc,true);
+}
+function emojiPopOutside(e){if(emojiPop&&!emojiPop.contains(e.target))fermerEmojiPop();}
+function emojiPopEsc(e){if(e.key==="Escape"){e.preventDefault();e.stopPropagation();fermerEmojiPop();}}
+// anchor : élément près duquel afficher la popover. key : clé de stockage (marque ou libellé normalisé).
+// onPick(emoji|null) : appelé après choix (emoji) ou réinitialisation (null).
+function ouvrirEmojiPop(anchor,key,onPick){
+  fermerEmojiPop();
+  if(!key)return;
+  const pop=document.createElement("div");
+  pop.className="emoji-pop";
+  const current=customEmojis.get(key)||"";
+  pop.innerHTML=`
+    <div class="ep-head"><span>Choisir un emoji</span></div>
+    <div class="ep-grid">${EMOJI_SUGGESTIONS.map(e=>`<button type="button" data-e="${e}">${e}</button>`).join("")}</div>
+    <div class="ep-custom"><input type="text" maxlength="4" placeholder="Autre…" id="ep-custom-input" value="${esc(current)}"></div>
+    <div class="ep-foot"><button type="button" class="btn ghost small" id="ep-reset">Réinitialiser</button></div>`;
+  document.body.appendChild(pop);
+  const r=anchor.getBoundingClientRect();
+  const top=r.bottom+window.scrollY+6,left=Math.min(r.left+window.scrollX,window.scrollX+document.documentElement.clientWidth-pop.offsetWidth-12);
+  pop.style.top=top+"px";pop.style.left=Math.max(12,left)+"px";
+  emojiPop=pop;
+  pop.addEventListener("mousedown",e=>e.stopPropagation());
+  pop.addEventListener("click",e=>{
+    const b=e.target.closest("button[data-e]");
+    if(b){onPick(b.dataset.e);fermerEmojiPop();return;}
+    if(e.target.id==="ep-reset"){onPick(null);fermerEmojiPop();}
+  });
+  const input=pop.querySelector("#ep-custom-input");
+  input.addEventListener("keydown",e=>{
+    if(e.key==="Enter"){e.preventDefault();const v=input.value.trim();if(v){onPick(v);fermerEmojiPop();}}
+  });
+  setTimeout(()=>{
+    document.addEventListener("mousedown",emojiPopOutside,true);
+    document.addEventListener("keydown",emojiPopEsc,true);
+  },0);
+}
+// Ouvre le picker pour le champ Libellé "kind" ("tx"|"rec"), ancré sur l'élément cliqué.
+function ouvrirEmojiPourChamp(kind,anchor){
+  const p=kind==="tx"?"t":"r";
+  const label=$(`#${p}-lib`).value.trim();
+  const b=brandFor(label);
+  const key=logoKey(label,b);
+  if(!key)return;
+  ouvrirEmojiPop(anchor,key,emoji=>{
+    setCustomEmoji(key,emoji);
+    $(`#${p}-logo`).dataset.s="";       // force le réaffichage même si la signature n'a pas changé
+    majAcLogo(kind,true);
+    render();                          // les logos déjà affichés dans les listes (dashboard, tableaux…) suivent
+  });
 }
 
 /* ---------- Utilitaires ---------- */
@@ -1222,7 +1360,7 @@ function majAcLogo(kind,now){
   if(!key){slot.dataset.s="";slot.innerHTML="";syncSlot(slot);return;}
   const sig=key+"|"+(b?b.domain:"");
   if(slot.dataset.s===sig)return;
-  const afficher=()=>{slot.dataset.s=sig;slot.innerHTML=logoHtml(label,true);syncSlot(slot);};
+  const afficher=()=>{slot.dataset.s=sig;slot.innerHTML=logoHtml(label,true,true);syncSlot(slot);};
   if(b||now||logoCache.has(sig))afficher();
   else{
     slot.dataset.s="";slot.innerHTML="";syncSlot(slot);
@@ -1514,6 +1652,13 @@ function bindEvents(){
       e.preventDefault();
       choisirAc(kind,ac.items[+it.dataset.i]);
     });
+    // Choisir un emoji de secours : clic sur la pastille (si repli) ou sur le petit bouton dédié
+    $(`#${p}-logo`).addEventListener("click",e=>{
+      const slot=e.currentTarget;
+      if(!slot.classList.contains("pickable"))return;
+      ouvrirEmojiPourChamp(kind,slot);
+    });
+    $(`#${p}-emoji-btn`).addEventListener("click",e=>ouvrirEmojiPourChamp(kind,e.currentTarget));
   }
 
   $("#r-freq").addEventListener("change",majFreqUI);
